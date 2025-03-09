@@ -57,6 +57,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React's default URL
     "http://127.0.0.1:3000",
+    "https://your-react-app.vercel.app",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (not recommended for production)
