@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/LoginModal.css";
 
-const API_URL = "https://django-react-app-2.0.onrender.com";
+const API_URL = "https://django-react-app-2-0.onrender.com";
 
 const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -36,7 +36,7 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || "Invalid username or password.");
+        throw new Error(data.error || "Invalid username or password.");
       }
 
       const data = await response.json();
@@ -46,7 +46,7 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
       navigate("/main"); // Redirect to the main page
     } catch (error) {
       console.error("Login Error:", error);
-      setError(error.message || "An error occurred during login.");
+      setError(error.message || "An error occurred during login. Please try again.");
     } finally {
       setIsLoading(false);
     }
