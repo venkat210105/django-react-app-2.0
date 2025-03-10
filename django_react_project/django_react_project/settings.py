@@ -11,9 +11,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://venkatmariserla21:ganesha1%40@cluster0.zrl05.mongodb.net/userdatabase?retryWrites=true&w=majority&appName=cluster0")
 
 # Security settings
-ALLOWED_HOSTS = ["*"]  # Allow all hosts (update this for production)
-if not DEBUG:
-    ALLOWED_HOSTS = ["your-django-app.onrender.com", "localhost"]  # Add your production domain
+ALLOWED_HOSTS = ["*"] if DEBUG else ["your-django-app.onrender.com", "localhost"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -30,26 +28,38 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add whitenoise middleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React's default URL
+    "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://your-react-app.vercel.app",  # Your React frontend's production URL
+    "https://p22-mhr40shns-venkata-karthik-sai-mariserlas-projects.vercel.app",
+    "https://p22-xi.vercel.app",
+    #"http://localhost:8000",
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (not recommended for production)
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',  # Allow the Authorization header
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 ROOT_URLCONF = 'django_react_project.urls'
 
@@ -72,8 +82,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_react_project.wsgi.application'
 
 # MongoDB connection
-client = MongoClient(MONGO_URI)
-db = client.userdatabase  # Replace with your database name
+try:
+    client = MongoClient(MONGO_URI)
+    db = client.userdatabase
+except Exception as e:
+    print(f"Failed to connect to MongoDB: {e}")
+    raise
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -104,3 +118,18 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}

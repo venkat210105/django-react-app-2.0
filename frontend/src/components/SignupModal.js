@@ -3,7 +3,7 @@ import "../styles/SignupModal.css";
 
 const SignupModal = ({ show, onClose, switchToLogin }) => {
   const [formData, setFormData] = useState({
-    name: "", // Changed from username to name
+    name: "",
     email: "",
     phone: "",
     password: "",
@@ -40,16 +40,15 @@ const SignupModal = ({ show, onClose, switchToLogin }) => {
 
     setIsLoading(true);
     try {
-      
       const response = await fetch("http://localhost:8000/signup/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name, // Changed from username to name
+          name: formData.name,
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
-          confirm_password: formData.confirmPassword, // Changed to match backend
+          confirm_password: formData.confirmPassword,
         }),
       });
 
@@ -84,7 +83,7 @@ const SignupModal = ({ show, onClose, switchToLogin }) => {
         <div className="modal-body">
           <input
             type="text"
-            name="name" // Changed from username to name
+            name="name"
             placeholder="Name"
             value={formData.name}
             onChange={handleChange}
