@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MainPage.css";
 
+const API_URL = "https://django-react-app-2.0.onrender.com";
+
 const MainPage = () => {
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
@@ -27,7 +29,7 @@ const MainPage = () => {
         const token = localStorage.getItem("token");
         console.log("Token:", token); // Debugging: Log the token
 
-        const response = await fetch("http://localhost:8000/me", {
+        const response = await fetch(`${API_URL}/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -76,7 +78,7 @@ const MainPage = () => {
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch(`http://localhost:8000/predict`, {
+      const response = await fetch(`${API_URL}/predict`, {
         method: "POST",
         body: formData,
       });
@@ -106,7 +108,7 @@ const MainPage = () => {
     setUpdateLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`http://localhost:8000/${endpoint}`, {
+      const response = await fetch(`${API_URL}/${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

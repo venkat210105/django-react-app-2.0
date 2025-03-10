@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "../styles/SignupModal.css";
 
+const API_URL = "https://django-react-app-2.0.onrender.com";
+
 const SignupModal = ({ show, onClose, switchToLogin }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -40,7 +42,7 @@ const SignupModal = ({ show, onClose, switchToLogin }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/signup/", {
+      const response = await fetch(`${API_URL}/signup/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
