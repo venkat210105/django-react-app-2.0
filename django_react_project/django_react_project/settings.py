@@ -43,8 +43,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://p22-mhr40shns-venkata-karthik-sai-mariserlas-projects.vercel.app",
-    "https://p22-xi.vercel.app",
+    "django-react-app-2-0-n4py-auq78yu70.vercel.app",
+    "https://django-react-app-2-0-n4py.vercel.app/",
     "http://localhost:8000",
     "http://127.0.0.1",
 ]
