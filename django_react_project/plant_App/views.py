@@ -17,6 +17,8 @@ EMAIL_REGEX = r"[^@]+@[^@]+\.[^@]+"
 # Phone number validation regex
 PHONE_REGEX = r"^\d{10}$"
 
+
+
 @csrf_exempt
 def signup(request):
     if request.method == "POST":
