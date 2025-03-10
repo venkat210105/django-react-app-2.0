@@ -45,7 +45,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://p22-mhr40shns-venkata-karthik-sai-mariserlas-projects.vercel.app",
     "https://p22-xi.vercel.app",
-    #"http://localhost:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
