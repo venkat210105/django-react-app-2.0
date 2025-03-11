@@ -8,8 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/https://p22-j5max8vp1-venkata-karthik-sai-mariserlas-projects.vercel.app/(.*)",
-      "dest": "/https://p22-j5max8vp1-venkata-karthik-sai-mariserlas-projects.vercel.app/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
