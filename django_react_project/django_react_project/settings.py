@@ -43,7 +43,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://192.168.0.103:3000/",
+    "http://192.168.0.103:3000",
     "django-react-app-2-0-n4py-auq78yu70.vercel.app",
     "https://django-react-app-2-0-n4py.vercel.app/",
     "http://localhost:8000",
