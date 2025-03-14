@@ -27,20 +27,28 @@ const MainPage = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
+        console.log("Token:", token); // Debugging: Log the token
+
         const response = await fetch(`${API_URL}/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         });
+
+        console.log("Response:", response); // Debugging: Log the response
 
         if (response.ok) {
           const userData = await response.json();
+          console.log("User Data:", userData); // Debugging: Log the user data
           setUsername(userData.username);
         } else {
+          console.error("Failed to fetch user data:", response.status, response.statusText);
           setError("Failed to fetch user data");
         }
       } catch (error) {
+        console.error("Error fetching user data:", error);
         setError("An error occurred while fetching user data.");
       }
     };
@@ -82,6 +90,7 @@ const MainPage = () => {
         setError(data.message || "An error occurred during prediction.");
       }
     } catch (error) {
+      console.error("Upload Error:", error);
       setError("An error occurred during upload.");
     } finally {
       setIsLoading(false);
@@ -111,14 +120,15 @@ const MainPage = () => {
       const data = await response.json();
       if (response.ok) {
         setError(successMessage);
-        return true;
+        return true; // Indicate success
       } else {
         setError(data.message || `Failed to update ${endpoint.split("-")[1]}`);
-        return false;
+        return false; // Indicate failure
       }
     } catch (error) {
+      console.error(`Error updating ${endpoint.split("-")[1]}:`, error);
       setError(`An error occurred while updating the ${endpoint.split("-")[1]}.`);
-      return false;
+      return false; // Indicate failure
     } finally {
       setUpdateLoading(false);
     }

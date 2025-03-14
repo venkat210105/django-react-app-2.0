@@ -26,16 +26,12 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
     setError("");
 
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${API_URL}/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
-        credentials: "include",  // Include credentials (cookies, tokens)
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -44,10 +40,10 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token); // Store the token
       alert("Login Successful!");
       onClose();
-      navigate("/main");
+      navigate("/main"); // Redirect to the main page
     } catch (error) {
       console.error("Login Error:", error);
       setError(error.message || "An error occurred during login. Please try again.");
@@ -73,7 +69,7 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
           <input
             type="text"
             name="username"
-            placeholder="Username (Email or Phone)"
+            placeholder="Username"
             value={formData.username}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
