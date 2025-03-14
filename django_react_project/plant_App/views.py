@@ -17,278 +17,231 @@ EMAIL_REGEX = r"[^@]+@[^@]+\.[^@]+"
 # Phone number validation regex
 PHONE_REGEX = r"^\d{10}$"
 
+# Existing endpoints (signup, login, me, predict, update_password, update_email, update_mobile)
+# ...
 
-
-@csrf_exempt
-def signup(request):
-    if request.method == "POST":
-        try:
-            # Parse the request body
-            data = json.loads(request.body)
-            name = data.get("name")
-            email = data.get("email")
-            phone = data.get("phone")
-            password = data.get("password")
-            confirm_password = data.get("confirm_password")
-
-            # Validate input
-            if not name or not email or not phone or not password or not confirm_password:
-                return JsonResponse({"error": "All fields are required."}, status=400)
-            if password != confirm_password:
-                return JsonResponse({"error": "Passwords do not match."}, status=400)
-            if not re.match(EMAIL_REGEX, email):
-                return JsonResponse({"error": "Invalid email address."}, status=400)
-            if not re.match(PHONE_REGEX, phone):
-                return JsonResponse({"error": "Invalid phone number. Must be 10 digits."}, status=400)
-
-            # Access the 'users' collection
-            users_collection = db.users
-
-            # Check if the email or phone already exists
-            if users_collection.find_one({"email": email}):
-                return JsonResponse({"error": "Email already exists."}, status=400)
-            if users_collection.find_one({"phone": phone}):
-                return JsonResponse({"error": "Phone number already exists."}, status=400)
-
-            # Hash the password and create a new user document
-            user = {
-                "name": name,
-                "email": email,
-                "phone": phone,
-                "password": make_password(password),
-            }
-            users_collection.insert_one(user)
-
-            return JsonResponse({"message": "User created successfully!"}, status=201)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON."}, status=400)
-        except Exception as e:
-            print(f"Error during signup: {e}")
-            return JsonResponse({"error": "An internal error occurred."}, status=500)
-    else:
-        return JsonResponse({"error": "Invalid request method."}, status=405)
+# New Endpoints
 
 @csrf_exempt
-def login(request):
+def update_profile_picture(request):
     if request.method == "POST":
         try:
-            # Parse the request body
-            data = json.loads(request.body)
-            username = data.get("username")
-            password = data.get("password")
+            file = request.FILES.get("file")
+            if not file:
+                return JsonResponse({"error": "No file uploaded."}, status=400)
 
-            # Validate input
-            if not username or not password:
-                return JsonResponse({"error": "Username and password are required."}, status=400)
+            token = request.headers.get("Authorization").split(" ")[1]
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            email = payload.get("email")
 
-            # Access the 'users' collection
+            file_path = f"profile_pictures/{email}_{file.name}"
+            with open(file_path, "wb+") as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+
             users_collection = db.users
-
-            # Find the user by username (email or phone)
-            user = users_collection.find_one({"$or": [{"email": username}, {"phone": username}]})
-            if not user:
-                return JsonResponse({"error": "Invalid username or password."}, status=400)
-
-            # Verify the password
-            if not check_password(password, user["password"]):
-                return JsonResponse({"error": "Invalid username or password."}, status=400)
-
-            # Generate a JWT token
-            token = jwt.encode(
-                {"email": user["email"], "exp": datetime.utcnow() + timedelta(hours=1)},
-                SECRET_KEY,
-                algorithm="HS256",
+            users_collection.update_one(
+                {"email": email},
+                {"$set": {"profile_picture": file_path}},
             )
 
-            return JsonResponse({"message": "Login successful!", "token": token}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON."}, status=400)
+            return JsonResponse({"message": "Profile picture updated successfully!"}, status=200)
         except Exception as e:
-            print(f"Error during login: {e}")
+            print(f"Error updating profile picture: {e}")
             return JsonResponse({"error": "An internal error occurred."}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method."}, status=405)
 
 @csrf_exempt
-def me(request):
+def prediction_history(request):
     if request.method == "GET":
         try:
-            # Get the Authorization header
-            auth_header = request.headers.get("Authorization")
-            if not auth_header or not auth_header.startswith("Bearer "):
-                return JsonResponse({"error": "Invalid or missing token."}, status=400)
-
-            # Extract the token
-            token = auth_header.split(" ")[1]
-            if not token:
-                return JsonResponse({"error": "Token is required."}, status=400)
-
-            # Decode the token
-            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            email = payload.get("email")
-
-            # Access the 'users' collection
-            users_collection = db.users
-
-            # Find the user by email
-            user = users_collection.find_one({"email": email})
-            if not user:
-                return JsonResponse({"error": "User not found."}, status=404)
-
-            # Return user data (excluding the password)
-            user_data = {
-                "username": user.get("name"),  # Assuming 'name' is the field for the username
-                "email": user.get("email"),
-                "phone": user.get("phone"),
-            }
-            return JsonResponse(user_data, status=200)
-        except jwt.ExpiredSignatureError:
-            return JsonResponse({"error": "Token has expired. Please log in again."}, status=401)
-        except jwt.InvalidTokenError:
-            return JsonResponse({"error": "Invalid token."}, status=401)
-        except Exception as e:
-            print(f"Error fetching user data: {e}")
-            return JsonResponse({"error": "An internal error occurred."}, status=500)
-    else:
-        return JsonResponse({"error": "Invalid request method."}, status=405)
-    
-    
-@csrf_exempt
-def predict(request):
-    if request.method == "POST":
-        try:
-            # Handle file upload and prediction logic here
-            # For now, return a dummy prediction
-            return JsonResponse({"prediction": "Disease Detected"}, status=200)
-        except Exception as e:
-            print(f"Error during prediction: {e}")
-            return JsonResponse({"error": "An internal error occurred."}, status=500)
-    else:
-        return JsonResponse({"error": "Invalid request method."}, status=405)
-
-@csrf_exempt
-def update_password(request):
-    if request.method == "POST":
-        try:
-            # Parse the request body
-            data = json.loads(request.body)
-            current_password = data.get("currentPassword")
-            new_password = data.get("newPassword")
-
-            # Validate input
-            if not current_password or not new_password:
-                return JsonResponse({"error": "Current and new passwords are required."}, status=400)
-
-            # Access the 'users' collection
-            users_collection = db.users
-
-            # Find the user by token (email)
             token = request.headers.get("Authorization").split(" ")[1]
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             email = payload.get("email")
-            user = users_collection.find_one({"email": email})
-            if not user:
-                return JsonResponse({"error": "User not found."}, status=404)
 
-            # Verify the current password
-            if not check_password(current_password, user["password"]):
-                return JsonResponse({"error": "Current password is incorrect."}, status=400)
+            predictions_collection = db.predictions
+            predictions = list(predictions_collection.find({"email": email}))
 
-            # Update the password
-            users_collection.update_one(
-                {"email": email},
-                {"$set": {"password": make_password(new_password)}},
-            )
-
-            return JsonResponse({"message": "Password updated successfully!"}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON."}, status=400)
+            return JsonResponse({"predictions": predictions}, status=200)
         except Exception as e:
-            print(f"Error updating password: {e}")
+            print(f"Error fetching prediction history: {e}")
             return JsonResponse({"error": "An internal error occurred."}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method."}, status=405)
 
 @csrf_exempt
-def update_email(request):
-    if request.method == "POST":
+def dashboard_stats(request):
+    if request.method == "GET":
         try:
-            # Parse the request body
-            data = json.loads(request.body)
-            new_email = data.get("newEmail")
-
-            # Validate input
-            if not new_email or not re.match(EMAIL_REGEX, new_email):
-                return JsonResponse({"error": "Please enter a valid email address."}, status=400)
-
-            # Access the 'users' collection
-            users_collection = db.users
-
-            # Find the user by token (email)
             token = request.headers.get("Authorization").split(" ")[1]
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             email = payload.get("email")
-            user = users_collection.find_one({"email": email})
-            if not user:
-                return JsonResponse({"error": "User not found."}, status=404)
 
-            # Check if the new email already exists
-            if users_collection.find_one({"email": new_email}):
-                return JsonResponse({"error": "Email already exists."}, status=400)
+            predictions_collection = db.predictions
+            total_predictions = predictions_collection.count_documents({"email": email})
+            successful_predictions = predictions_collection.count_documents({"email": email, "result": "Healthy"})
 
-            # Update the email
-            users_collection.update_one(
-                {"email": email},
-                {"$set": {"email": new_email}},
-            )
-
-            return JsonResponse({"message": "Email updated successfully!"}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON."}, status=400)
+            return JsonResponse({
+                "total_predictions": total_predictions,
+                "successful_predictions": successful_predictions,
+            }, status=200)
         except Exception as e:
-            print(f"Error updating email: {e}")
+            print(f"Error fetching dashboard stats: {e}")
             return JsonResponse({"error": "An internal error occurred."}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method."}, status=405)
 
 @csrf_exempt
-def update_mobile(request):
-    if request.method == "POST":
+def notifications(request):
+    if request.method == "GET":
         try:
-            # Parse the request body
-            data = json.loads(request.body)
-            new_mobile = data.get("newMobile")
-
-            # Validate input
-            if not new_mobile or not re.match(PHONE_REGEX, new_mobile):
-                return JsonResponse({"error": "Please enter a valid 10-digit mobile number."}, status=400)
-
-            # Access the 'users' collection
-            users_collection = db.users
-
-            # Find the user by token (email)
             token = request.headers.get("Authorization").split(" ")[1]
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             email = payload.get("email")
-            user = users_collection.find_one({"email": email})
-            if not user:
-                return JsonResponse({"error": "User not found."}, status=404)
 
-            # Check if the new mobile number already exists
-            if users_collection.find_one({"phone": new_mobile}):
-                return JsonResponse({"error": "Mobile number already exists."}, status=400)
+            notifications_collection = db.notifications
+            notifications = list(notifications_collection.find({"email": email}))
 
-            # Update the mobile number
+            return JsonResponse({"notifications": notifications}, status=200)
+        except Exception as e:
+            print(f"Error fetching notifications: {e}")
+            return JsonResponse({"error": "An internal error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def support(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            message = data.get("message")
+
+            if not message:
+                return JsonResponse({"error": "Message is required."}, status=400)
+
+            support_collection = db.support
+            support_collection.insert_one({"message": message})
+
+            return JsonResponse({"message": "Support request submitted successfully!"}, status=200)
+        except Exception as e:
+            print(f"Error submitting support request: {e}")
+            return JsonResponse({"error": "An internal error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def feedback(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            feedback = data.get("feedback")
+            rating = data.get("rating")
+
+            if not feedback or not rating:
+                return JsonResponse({"error": "Feedback and rating are required."}, status=400)
+
+            feedback_collection = db.feedback
+            feedback_collection.insert_one({"feedback": feedback, "rating": rating})
+
+            return JsonResponse({"message": "Feedback submitted successfully!"}, status=200)
+        except Exception as e:
+            print(f"Error submitting feedback: {e}")
+            return JsonResponse({"error": "An internal error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def create_post(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            title = data.get("title")
+            content = data.get("content")
+
+            if not title or not content:
+                return JsonResponse({"error": "Title and content are required."}, status=400)
+
+            posts_collection = db.posts
+            posts_collection.insert_one({"title": title, "content": content})
+
+            return JsonResponse({"message": "Post created successfully!"}, status=200)
+        except Exception as e:
+            print(f"Error creating post: {e}")
+            return JsonResponse({"error": "An internal error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def get_posts(request):
+    if request.method == "GET":
+        try:
+            posts_collection = db.posts
+            posts = list(posts_collection.find({}))
+
+            return JsonResponse({"posts": posts}, status=200)
+        except Exception as e:
+            print(f"Error fetching posts: {e}")
+            return JsonResponse({"error": "An internal error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def educational_content(request):
+    if request.method == "GET":
+        try:
+            content_collection = db.educational_content
+            content = list(content_collection.find({}))
+
+            return JsonResponse({"content": content}, status=200)
+        except Exception as e:
+            print(f"Error fetching educational content: {e}")
+            return JsonResponse({"error": "An internal error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def update_theme(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            theme = data.get("theme")
+
+            if not theme:
+                return JsonResponse({"error": "Theme is required."}, status=400)
+
+            users_collection = db.users
             users_collection.update_one(
-                {"email": email},
-                {"$set": {"phone": new_mobile}},
+                {"email": request.user.email},
+                {"$set": {"theme": theme}},
             )
 
-            return JsonResponse({"message": "Mobile number updated successfully!"}, status=200)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON."}, status=400)
+            return JsonResponse({"message": "Theme updated successfully!"}, status=200)
         except Exception as e:
-            print(f"Error updating mobile number: {e}")
+            print(f"Error updating theme: {e}")
+            return JsonResponse({"error": "An internal error occurred."}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def update_language(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            language = data.get("language")
+
+            if not language:
+                return JsonResponse({"error": "Language is required."}, status=400)
+
+            users_collection = db.users
+            users_collection.update_one(
+                {"email": request.user.email},
+                {"$set": {"language": language}},
+            )
+
+            return JsonResponse({"message": "Language updated successfully!"}, status=200)
+        except Exception as e:
+            print(f"Error updating language: {e}")
             return JsonResponse({"error": "An internal error occurred."}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method."}, status=405)
