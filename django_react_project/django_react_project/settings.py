@@ -11,7 +11,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://venkatmariserla21:ganesha1%40@cluster0.zrl05.mongodb.net/userdatabase?retryWrites=true&w=majority&appName=cluster0")
 
 # Security settings
-ALLOWED_HOSTS = ["*"] if DEBUG else ["your-django-app.onrender.com", "localhost"]
+ALLOWED_HOSTS = ["*"] if DEBUG else ["django-react-app-2-0.onrender.com", "localhost"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -21,14 +21,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
+    'corsheaders',  # Add this
     'rest_framework',
     'plant_App',
     'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Add this at the top
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -44,12 +44,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://192.168.0.103:3000",
-    "https://django-react-app-2-0-n4py.vercel.app",
-    "https://django-react-app-2-0.onrender.com/login/",
+    "https://django-react-app-2-0-n4py.vercel.app",  # Add your frontend URL
+    "https://django-react-app-2-0.onrender.com",    # Add your backend URL
     "http://localhost:8000",
     "http://127.0.0.1",
 ]
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True  # Allow credentials (cookies, tokens)
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -68,7 +68,7 @@ ROOT_URLCONF = 'django_react_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Add this line
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -117,8 +117,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

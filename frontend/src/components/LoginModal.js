@@ -35,6 +35,7 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
           username: formData.username,
           password: formData.password,
         }),
+        credentials: "include",  // Include credentials (cookies, tokens)
       });
 
       if (!response.ok) {
@@ -43,10 +44,10 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token); // Store the token
+      localStorage.setItem("token", data.token);
       alert("Login Successful!");
       onClose();
-      navigate("/main"); // Redirect to the main page
+      navigate("/main");
     } catch (error) {
       console.error("Login Error:", error);
       setError(error.message || "An error occurred during login. Please try again.");
