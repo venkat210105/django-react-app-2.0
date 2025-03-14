@@ -26,12 +26,15 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
     setError("");
 
     try {
-      const response = await fetch(`${API_URL}/login/`, {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
       });
 
       if (!response.ok) {
@@ -69,7 +72,7 @@ const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) =
           <input
             type="text"
             name="username"
-            placeholder="Username"
+            placeholder="Username (Email or Phone)"
             value={formData.username}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
