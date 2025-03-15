@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MainPage.css";
 
-const API_URL = "https://django-react-app-2.0.onrender.com";
+const API_URL = "https://django-react-app-2-0.onrender.com";
+//const API_URL = "http://127.0.0.1:8000";
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -27,8 +28,8 @@ const MainPage = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log("Token:", token); // Debugging: Log the token
-
+        console.log("Token:", token);
+    
         const response = await fetch(`${API_URL}/me`, {
           method: "GET",
           headers: {
@@ -36,12 +37,13 @@ const MainPage = () => {
           },
           credentials: "include",
         });
-
-        console.log("Response:", response); // Debugging: Log the response
-
+    
+        const responseText = await response.text(); // Inspect response text
+        console.log("Response Text:", responseText);
+    
         if (response.ok) {
-          const userData = await response.json();
-          console.log("User Data:", userData); // Debugging: Log the user data
+          const userData = JSON.parse(responseText); // Handle JSON parsing separately
+          console.log("User Data:", userData);
           setUsername(userData.username);
         } else {
           console.error("Failed to fetch user data:", response.status, response.statusText);
@@ -52,6 +54,7 @@ const MainPage = () => {
         setError("An error occurred while fetching user data.");
       }
     };
+    
     fetchUserData();
   }, [navigate]);
 
