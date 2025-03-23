@@ -45,7 +45,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://192.168.0.103:3000",
     "https://django-react-app-2-0-n4py.vercel.app",
-    "http://localhost:8000",
     "http://127.0.0.1",
     "https://django-react-app-2-0.onrender.com",
 ]
@@ -55,6 +54,7 @@ CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access the CSRF token
 CSRF_COOKIE_SAMESITE = "None"  # Allow cross-site requests
 CSRF_COOKIE_SECURE = True      # Ensure the cookie is only sent over HTTPS
 
+CORS_ALLOW_ALL_ORIGINS = True  # Or specify allowed origins
 
 CORS_ALLOW_HEADERS = [
     'accept',

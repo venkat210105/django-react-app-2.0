@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MainPage.css";
 
-const API_URL = "https://django-react-app-2-0.onrender.com";
-//const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://127.0.0.1:8000"; // Update this in production
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -22,14 +21,19 @@ const MainPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isFetchingUser, setIsFetchingUser] = useState(false);
 
   // Fetch logged-in user's details
   useEffect(() => {
     const fetchUserData = async () => {
+      setIsFetchingUser(true);
       try {
         const token = localStorage.getItem("token");
-        console.log("Token:", token);
-    
+        if (!token) {
+          navigate("/"); // Redirect to login if no token
+          return;
+        }
+
         const response = await fetch(`${API_URL}/me`, {
           method: "GET",
           headers: {
@@ -37,24 +41,21 @@ const MainPage = () => {
           },
           credentials: "include",
         });
-    
-        const responseText = await response.text(); // Inspect response text
-        console.log("Response Text:", responseText);
-    
-        if (response.ok) {
-          const userData = JSON.parse(responseText); // Handle JSON parsing separately
-          console.log("User Data:", userData);
-          setUsername(userData.username);
-        } else {
-          console.error("Failed to fetch user data:", response.status, response.statusText);
-          setError("Failed to fetch user data");
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.statusText}`);
         }
+
+        const data = await response.json();
+        setUsername(data.username || "User");
       } catch (error) {
         console.error("Error fetching user data:", error);
-        setError("An error occurred while fetching user data.");
+        setError("Failed to fetch user data. Please try again.");
+      } finally {
+        setIsFetchingUser(false);
       }
     };
-    
+
     fetchUserData();
   }, [navigate]);
 
@@ -64,6 +65,7 @@ const MainPage = () => {
     if (file && file.type.startsWith("image/")) {
       setSelectedFile(file);
       setPredictionResult("");
+      setError("");
     } else {
       setError("Please upload a valid image file (JPEG, PNG).");
     }
@@ -86,15 +88,15 @@ const MainPage = () => {
         body: formData,
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        setPredictionResult(data.prediction);
-      } else {
-        setError(data.message || "An error occurred during prediction.");
+      if (!response.ok) {
+        throw new Error("Failed to get prediction.");
       }
+
+      const data = await response.json();
+      setPredictionResult(data.prediction || "No prediction available.");
     } catch (error) {
       console.error("Upload Error:", error);
-      setError("An error occurred during upload.");
+      setError("An error occurred during upload. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -120,17 +122,16 @@ const MainPage = () => {
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        setError(successMessage);
-        return true; // Indicate success
-      } else {
-        setError(data.message || `Failed to update ${endpoint.split("-")[1]}`);
-        return false; // Indicate failure
+      if (!response.ok) {
+        throw new Error(`Failed to update ${endpoint.split("-")[1]}`);
       }
+
+      const data = await response.json();
+      setError(successMessage);
+      return true; // Indicate success
     } catch (error) {
       console.error(`Error updating ${endpoint.split("-")[1]}:`, error);
-      setError(`An error occurred while updating the ${endpoint.split("-")[1]}.`);
+      setError(`Failed to update ${endpoint.split("-")[1]}.`);
       return false; // Indicate failure
     } finally {
       setUpdateLoading(false);
@@ -144,7 +145,7 @@ const MainPage = () => {
     }
 
     const success = await handleUpdate(
-      "update-password",
+      "update-password/",
       { currentPassword, newPassword },
       "Password updated successfully!"
     );
@@ -193,6 +194,14 @@ const MainPage = () => {
     window.addEventListener("keydown", handleEscapeKey);
     return () => window.removeEventListener("keydown", handleEscapeKey);
   }, []);
+
+  // Clear error after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   return (
     <div className="main-page">

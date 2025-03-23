@@ -7,6 +7,7 @@ import jwt
 from datetime import datetime, timedelta
 import os
 import re
+from django.views.decorators.csrf import csrf_exempt
 
 # Secret key for JWT (use environment variable in production)
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fallback-key")
@@ -209,6 +210,10 @@ def update_password(request):
     else:
         return JsonResponse({"error": "Invalid request method."}, status=405)
 
+
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["OPTIONS", "POST"])
 @csrf_exempt
 def update_email(request):
     if request.method == "POST":
@@ -245,6 +250,10 @@ def update_email(request):
             return JsonResponse({"message": "Email updated successfully!"}, status=200)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON."}, status=400)
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({"error": "Token has expired. Please log in again."}, status=401)
+        except jwt.InvalidTokenError:
+            return JsonResponse({"error": "Invalid token."}, status=401)
         except Exception as e:
             print(f"Error updating email: {e}")
             return JsonResponse({"error": "An internal error occurred."}, status=500)

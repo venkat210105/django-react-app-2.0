@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/LoginModal.css";
 
-const API_URL = "https://django-react-app-2-0.onrender.com";
-//const API_URL = "http://127.0.0.1:8000";
+//const API_URL = "https://django-react-app-2-0.onrender.com";
+const API_URL = "http://127.0.0.1:8000";
 
 const LoginModal = ({ show, onClose, switchToSignup, switchToForgotPassword }) => {
   const [formData, setFormData] = useState({ username: "", password: "" });
