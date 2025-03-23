@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import "../styles/SignupModal.css";
 
-const API_URL = "https://django-react-app-2-0.onrender.com";
-//const API_URL = "http://127.0.0.1:8000/";
+const API_URL = "https://django-react-app-2.0.onrender.com";
 
 const SignupModal = ({ show, onClose, switchToLogin }) => {
   const [formData, setFormData] = useState({

@@ -43,8 +43,15 @@ const MainPage = () => {
           credentials: "include",
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user data: ${response.statusText}`);
+        console.log("Response:", response); // Debugging: Log the response
+
+        if (response.ok) {
+          const userData = await response.json();
+          console.log("User Data:", userData); // Debugging: Log the user data
+          setUsername(userData.username);
+        } else {
+          console.error("Failed to fetch user data:", response.status, response.statusText);
+          setError("Failed to fetch user data");
         }
 
         const data = await response.json();
@@ -56,7 +63,6 @@ const MainPage = () => {
         setIsFetchingUser(false); // Set fetching state to false
       }
     };
-
     fetchUserData();
   }, [navigate]);
 

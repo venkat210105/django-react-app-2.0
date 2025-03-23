@@ -11,7 +11,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://venkatmariserla21:ganesha1%40@cluster0.zrl05.mongodb.net/userdatabase?retryWrites=true&w=majority&appName=cluster0")
 
 # Security settings
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*"] if DEBUG else ["your-django-app.onrender.com", "localhost"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -46,7 +46,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.0.103:3000",
     "https://django-react-app-2-0-n4py.vercel.app",
     "http://127.0.0.1",
-    "https://django-react-app-2-0.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -73,7 +72,7 @@ ROOT_URLCONF = 'django_react_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'frontend', 'build')], # Corrected path
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Add this line
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,10 +120,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '..', 'frontend', 'build', 'static'),  # Path to your React build
-    os.path.join(BASE_DIR, '..', 'frontend', 'build')  # Include build root for manifest.json
-]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
@@ -148,6 +143,4 @@ LOGGING = {
 }
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = True
