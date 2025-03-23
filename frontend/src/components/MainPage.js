@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MainPage.css";
 
-const API_URL = "http://127.0.0.1:8000"; // Update this in production
+const API_URL = "https://django-react-app-2-0.onrender.com";
+//const API_URL = "http://127.0.0.1:8000"; // Update this in production
 
 const MainPage = () => {
   const navigate = useNavigate();
