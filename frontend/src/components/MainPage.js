@@ -22,8 +22,7 @@ const MainPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isFetchingUser, setIsFetchingUser] = useState(false);
-
+  
   // Fetch logged-in user's details
   useEffect(() => {
     const fetchUserData = async () => {
@@ -127,7 +126,6 @@ const MainPage = () => {
         throw new Error(`Failed to update ${endpoint.split("-")[1]}`);
       }
 
-      const data = await response.json();
       setError(successMessage);
       return true; // Indicate success
     } catch (error) {
