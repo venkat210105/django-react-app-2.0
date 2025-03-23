@@ -22,11 +22,12 @@ const MainPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState("");
-  
+  const [isFetchingUser, setIsFetchingUser] = useState(false); // Define isFetchingUser and setIsFetchingUser
+
   // Fetch logged-in user's details
   useEffect(() => {
     const fetchUserData = async () => {
-      setIsFetchingUser(true);
+      setIsFetchingUser(true); // Set fetching state to true
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -52,7 +53,7 @@ const MainPage = () => {
         console.error("Error fetching user data:", error);
         setError("Failed to fetch user data. Please try again.");
       } finally {
-        setIsFetchingUser(false);
+        setIsFetchingUser(false); // Set fetching state to false
       }
     };
 
@@ -126,6 +127,7 @@ const MainPage = () => {
         throw new Error(`Failed to update ${endpoint.split("-")[1]}`);
       }
 
+      const data = await response.json();
       setError(successMessage);
       return true; // Indicate success
     } catch (error) {
